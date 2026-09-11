@@ -1,0 +1,91 @@
+/* ============================================================
+   OPI ROBOTICS — Motion
+   Trigger → Behavior → Duration/Easing documented inline.
+   Cosmic Deep motion character: slow, drifting, weightless — never snappy.
+   Only transform + opacity are animated (no layout-shift properties).
+   ============================================================ */
+
+/* Top progress bar — Trigger: internal nav click → Behavior: indeterminate
+   fill grows then completes on new page paint → Duration: ~500ms ease-out */
+.route-progress{
+  position:fixed; top:0; left:0; height:2px; width:0%; z-index:2000;
+  background:linear-gradient(90deg, var(--p), var(--a));
+  transition:width var(--dur-slow) var(--ease-drift), opacity var(--dur-base) var(--ease-out-premium);
+  opacity:0;
+}
+.route-progress.is-active{ opacity:1; }
+
+/* Page exit/entry fade — Trigger: click internal link → Behavior: 180ms fade+drift
+   out, navigate, new page fades+drifts in on load */
+body.is-leaving{ animation:pageOut 180ms var(--ease-in-premium) forwards; }
+body.is-entering{ animation:pageIn var(--dur-base) var(--ease-out-premium) both; }
+@keyframes pageOut{ to{ opacity:0; transform:translateY(-6px); } }
+@keyframes pageIn{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+
+/* Scroll reveal — several distinct treatments per Section 5A/6 (no repeated fade-up everywhere) */
+[data-reveal]{ opacity:0; }
+[data-reveal].is-revealed{ opacity:1; }
+
+[data-reveal="rise"]{ transform:translateY(24px); transition:opacity var(--dur-slow) var(--ease-out-premium), transform var(--dur-slow) var(--ease-out-premium); }
+[data-reveal="rise"].is-revealed{ transform:translateY(0); }
+
+[data-reveal="mask"]{ overflow:hidden; }
+[data-reveal="mask"] .mask-inner{ display:inline-block; transform:translateY(110%); transition:transform var(--dur-slow) var(--ease-out-premium); }
+[data-reveal="mask"].is-revealed .mask-inner{ transform:translateY(0); }
+[data-reveal="mask"].is-revealed{ opacity:1; }
+
+[data-reveal="line"]{ }
+[data-reveal="line"] .line-draw{ transform:scaleX(0); transform-origin:left center; transition:transform var(--dur-orbit) var(--ease-drift); }
+[data-reveal="line"].is-revealed{ opacity:1; }
+[data-reveal="line"].is-revealed .line-draw{ transform:scaleX(1); }
+
+[data-reveal="stagger"] > *{ opacity:0; transform:translateY(18px); transition:opacity var(--dur-base) var(--ease-out-premium), transform var(--dur-base) var(--ease-out-premium); }
+[data-reveal="stagger"].is-revealed > *{ opacity:1; transform:translateY(0); }
+
+[data-reveal="fade"]{ transition:opacity var(--dur-slow) var(--ease-out-premium); }
+[data-reveal="fade"].is-revealed{ opacity:1; }
+
+/* Buttons */
+.btn{ transition:transform var(--dur-fast) var(--ease-out-premium), background-color var(--dur-fast), border-color var(--dur-fast), box-shadow var(--dur-fast); }
+.btn:active{ transform:scale(.97); }
+@media (hover:hover){
+  .btn-primary:hover{ background:var(--p-hover); box-shadow:var(--glow-p); }
+  .btn-ghost:hover{ border-color:var(--border-strong); background:var(--surface-hover); }
+  .row-link:hover .row-link__arrow{ transform:translateX(4px); }
+}
+
+/* Nav */
+.site-nav{ transition:background-color var(--dur-base) var(--ease-out-premium), backdrop-filter var(--dur-base), padding var(--dur-base), border-color var(--dur-base); }
+.nav-overlay{ transition:opacity var(--dur-base) var(--ease-out-premium), visibility var(--dur-base); }
+.nav-overlay__panel{ transition:transform var(--dur-slow) var(--ease-out-premium); }
+
+/* Cards / rows */
+.row-card{ transition:background-color var(--dur-fast), border-color var(--dur-fast); }
+@media (hover:hover){ .row-card:hover{ background:var(--surface); border-color:var(--border-strong); } }
+
+/* Loading page pulse — premium subtle indicator, not a spinner */
+.pulse-dot{ width:10px; height:10px; border-radius:50%; background:var(--a); box-shadow:0 0 0 0 rgba(34,211,238,.6); animation:pulseDot 1.8s var(--ease-drift) infinite; }
+@keyframes pulseDot{ 0%{ box-shadow:0 0 0 0 rgba(34,211,238,.5); } 70%{ box-shadow:0 0 0 14px rgba(34,211,238,0); } 100%{ box-shadow:0 0 0 0 rgba(34,211,238,0); } }
+
+/* Skeleton shimmer for tool result */
+.skeleton{ position:relative; overflow:hidden; background:var(--surface-raised); border-radius:var(--r-sm); }
+.skeleton::after{
+  content:""; position:absolute; inset:0; transform:translateX(-100%);
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent);
+  animation:shimmer 1.3s var(--ease-drift) infinite;
+}
+@keyframes shimmer{ 100%{ transform:translateX(100%); } }
+
+/* OTP verifying state */
+.otp-box.is-verifying{ animation:otpPulse var(--dur-orbit) var(--ease-drift) infinite; }
+@keyframes otpPulse{ 50%{ border-color:var(--a); box-shadow:0 0 0 3px rgba(34,211,238,.15); } }
+
+/* Error shake */
+.shake{ animation:shakeX 380ms var(--ease-drift); }
+@keyframes shakeX{ 20%,60%{ transform:translateX(-5px); } 40%,80%{ transform:translateX(5px); } 100%{ transform:translateX(0); } }
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
+  [data-reveal]{ opacity:1 !important; transform:none !important; }
+  [data-reveal="mask"] .mask-inner, [data-reveal="line"] .line-draw{ transform:none !important; }
+}
