@@ -1,0 +1,130 @@
+/* ============================================================
+   OPI ROBOTICS — Media layers (hero video overlay + section video)
+   Videos live at fixed paths in /assets/media/ so they can be
+   swapped by dropping a file in with the same name. See
+   assets/media/README.md.
+   ============================================================ */
+
+/* ---------- HERO VIDEO OVERLAY ----------
+   Sits inside .hero-stage above the gradient canvas (z 0) and the
+   starfield, but below .hero-content (z 2). The scrim keeps the
+   headline readable no matter how bright the footage is. */
+.hero-video{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:0;
+  opacity:.5;
+  /* Pull the footage into the palette instead of letting raw color fight it */
+  filter:saturate(.85) contrast(1.05) brightness(.72);
+  pointer-events:none;
+  transition:opacity var(--dur-slow) var(--ease-out-premium);
+}
+/* Fade the video in only once it can actually play, so a slow network
+   never shows a half-painted frame over the gradient. */
+.hero-video:not(.is-ready){ opacity:0; }
+
+.hero-scrim{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(4,6,13,.72) 0%, rgba(4,6,13,.35) 38%, rgba(4,6,13,.55) 72%, rgba(4,6,13,.88) 100%),
+    linear-gradient(90deg, rgba(4,6,13,.78) 0%, rgba(4,6,13,.30) 55%, transparent 100%);
+}
+
+/* When no video is available the gradient canvas alone carries the hero,
+   so the scrim lightens to avoid an unnecessarily muddy background. */
+.hero-stage.no-video .hero-scrim{
+  background:linear-gradient(180deg, rgba(4,6,13,.45) 0%, transparent 45%, rgba(4,6,13,.65) 100%);
+}
+
+/* ---------- SECTION VIDEO (product / perception) ---------- */
+.media-frame{
+  position:relative;
+  overflow:hidden;
+  border-radius:var(--r-lg);
+  border:1px solid var(--border-strong);
+  background:var(--bg-recessed);
+  isolation:isolate;
+}
+/* Reserve the aspect box up front so the sheet never reflows on load */
+.media-frame--wide{ aspect-ratio:16 / 9; }
+.media-frame--panel{ aspect-ratio:4 / 3; }
+
+.media-frame video,
+.media-frame img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:0;
+  opacity:.62;
+  filter:saturate(.9) contrast(1.04) brightness(.8);
+  transition:opacity var(--dur-slow) var(--ease-out-premium), transform var(--dur-slow) var(--ease-out-premium);
+}
+.media-frame video:not(.is-ready){ opacity:0; }
+
+.media-frame__scrim{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    radial-gradient(70% 90% at 20% 20%, rgba(59,130,246,.20), transparent 62%),
+    linear-gradient(180deg, rgba(4,6,13,.30) 0%, rgba(4,6,13,.55) 60%, rgba(4,6,13,.80) 100%);
+}
+
+/* Copy sitting on top of the footage */
+.media-frame__body{
+  position:relative;
+  z-index:2;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  padding:var(--sp-5);
+}
+.media-frame__body--center{
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:var(--sp-6) var(--gutter);
+}
+.media-frame__body h2,
+.media-frame__body h3{ margin:0; }
+.media-frame__body .lede{ margin-top:16px; }
+
+/* A quiet mono caption strip, useful for labelling real floor footage */
+.media-caption{
+  margin-top:12px;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--text-3);
+}
+
+@media (hover:hover){
+  .media-frame:hover video{ opacity:.72; transform:scale(1.015); }
+}
+
+@media (max-width:899px){
+  .media-frame--wide{ aspect-ratio:4 / 3; }
+  .media-frame__body{ padding:var(--sp-4); }
+  .hero-video{ opacity:.42; }
+}
+
+/* Motion preferences: never autoplay a loop for users who opted out.
+   media.js also pauses the elements; this keeps the poster frame visible. */
+@media (prefers-reduced-motion:reduce){
+  .hero-video,
+  .media-frame video{ transition:none; }
+  @media (hover:hover){
+    .media-frame:hover video{ transform:none; }
+  }
+}
